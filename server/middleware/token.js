@@ -96,7 +96,7 @@ function token(options) {
     var registry = app.registry;
     if (!TokenModel) {
       if (registry === loopback.registry) {
-        TokenModel = options.model || loopback.AccessToken;
+        TokenModel = app.models[options.model] || loopback.AccessToken;
       } else if (options.model) {
         TokenModel = registry.getModel(options.model);
       } else {
