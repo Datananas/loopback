@@ -1,0 +1,34 @@
+{
+  "initial:before": {
+    "./lib/loopback#favicon": {}
+  },
+  "initial": {},
+  "session": {},
+  "auth": {
+    "./lib/loopback#token": {
+      "params": {
+        "model": "accessToken"
+      }
+    }
+  },
+  "parse": {},
+  "routes": {
+    "./lib/loopback#rest": {
+      "paths": [
+        "${restApiRoot}"
+      ]
+    }
+  },
+  "files": {},
+  "final": {
+    "./lib/loopback#urlNotFound": {}
+  },
+  "final:after": {
+		"strong-error-handler": {
+			"params": {
+				"debug": true,
+				"log": true
+			}
+		}
+	}
+}

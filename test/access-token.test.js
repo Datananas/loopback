@@ -13,6 +13,7 @@ var loopback = require('../');
 var extend = require('util')._extend;
 var session = require('express-session');
 var request = require('supertest');
+var path = require('path');
 
 var Token, ACL;
 
@@ -31,6 +32,28 @@ describe('loopback.token(options)', function() {
     ACL = app.registry.getModel('ACL');
 
     createTestingToken.call(this, done);
+  });
+
+  // it('should default to built-in AccessToken model', function(done) {
+  // });
+
+  it('should use custom AccessToken model when providing one in options', function() {
+    var app = require(path.join(__dirname, 'fixtures/middleware-config/server/server.js'));
+    var Token = app.registry.getModel('accessToken');
+    var User = app.registry.getModel('user');
+    var user;
+
+    return User.create({username: 'test', email: 'test@test.com', password: 'test'})
+    .then(function(u) {
+      user = u;
+      return Token.create({userId: user.id});
+    })
+    .then(function(token) {
+      return request(app)
+        .get('/api/users/' + user.id)
+        .set('authorization', token.id)
+        .expect(200);
+    });
   });
 
   it('should populate req.token from the query string', function(done) {
@@ -287,7 +310,7 @@ describe('loopback.token(options)', function() {
     });
 
     it('should overwrite invalid existing token (is !== undefined and has no "id" property) ' +
-      ' when enableDoubkecheck is true',
+      ' when enableDoublecheck is true',
     function(done) {
       var token = this.token;
       app.use(function(req, res, next) {
@@ -607,9 +630,10 @@ function createTestAppAndRequest(testToken, settings, done) {
 }
 
 function createTestApp(testToken, settings, done) {
-  done = arguments[arguments.length - 1];
-  if (settings == done) settings = {};
-  settings = settings || {};
+  if (!done && typeof settings === 'function') {
+    done = settings;
+    settings = {};
+  }
 
   var appSettings = settings.app || {};
   var modelSettings = settings.model || {};
